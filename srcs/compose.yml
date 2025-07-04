@@ -1,0 +1,37 @@
+name: inception
+
+services:
+  nginx:
+    build:
+      context: ./requirements/nginx
+      args:
+        OS_VERSION: ${OS_VERSION}
+  wordpress:
+    build:
+      context: ./requirements/wordpress
+      args:
+        OS_VERSION: ${OS_VERSION}
+    secrets:
+      - admin_password
+      - user_password
+  mysql:
+    build:
+      context: ./requirements/mariadb
+      args:
+        OS_VERSION: ${OS_VERSION}
+    secrets:
+      - db_root_password
+      - db_password
+
+networks:
+  incepnet:
+
+secrets:
+  db_root_password:
+    file: ../.secrets/db_root_password.txt
+  db_password:
+    file: ../.secrets/db_password.txt
+  admin_password:
+    file: ../.secrets/admin_password.txt
+  user_password:
+    file: ../.secrets/user_password.txt
