@@ -22,25 +22,35 @@ if [ ! -d "$ROOT_DIR" ]; then
 	exit 1
 fi
 
-echo "ROOT_DIR=$ROOT_DIR" > $ENV
-echo "LOGIN=$LOGIN" >> $ENV
-echo "DOMAIN=$LOGIN.42.fr" >> $ENV
-echo "VOLUME=/home/$LOGIN/data" >> $ENV
-echo "OS_VERSION=$(curl -s https://dl-cdn.alpinelinux.org/alpine/ | grep -o 'v[0-9]\+\.[0-9]\+' | sort -u | sort -n | tail -n2 | head -n1 | cut -dv -f2)" >> $ENV
-echo "DB_USER=$(tr -dc 'a-zA-Z' < /dev/urandom | head -c 10)" >> $ENV
-echo "DB_NAME=$(tr -dc 'a-z0-9A-Z' < /dev/urandom | head -c 10)" >> $ENV
-echo "WP_ADMIN=$(tr -dc 'a-z0-9A-Z' < /dev/urandom | head -c 10)" >> $ENV
-echo "WP_USER=$(tr -dc 'a-z0-9A-Z' < /dev/urandom | head -c 10)" >> $ENV
+echo "ROOT_DIR=$ROOT_DIR" > "$ENV"
+echo "LOGIN=$LOGIN" >> "$ENV"
+echo "DOMAIN=$LOGIN.42.fr" >> "$ENV"
+echo "VOLUME=/home/$LOGIN/data" >> "$ENV"
+echo "OS_VERSION=$(curl -s https://dl-cdn.alpinelinux.org/alpine/ | grep -o 'v[0-9]\+\.[0-9]\+' | sort -u | sort -n | tail -n2 | head -n1 | cut -dv -f2)" >> "$ENV"
+echo "DB_USER=$(tr -dc 'a-z0-9' < /dev/urandom | head -c 7)" >> "$ENV"
+echo "DB_NAME=$(tr -dc 'a-z0-9' < /dev/urandom | head -c 7)" >> "$ENV"
+echo "WP_ADMIN=$(tr -dc 'a-z0-9' < /dev/urandom | head -c 7)" >> "$ENV"
+echo "WP_USER=$(tr -dc 'a-z0-9' < /dev/urandom | head -c 7)" >> "$ENV"
 
-SECRETS=$ROOT_DIR/.secrets
-mkdir -p $SECRETS
+SECRETS="$ROOT_DIR/.secrets"
+mkdir -p "$SECRETS"
 if [ -d "$SECRETS" ]; then
 	openssl rand -base64 42 > "$SECRETS/db_root_password.txt"
 	openssl rand -base64 42 > "$SECRETS/db_password.txt"
 	openssl rand -base64 42 > "$SECRETS/admin_password.txt"
 	openssl rand -base64 42 > "$SECRETS/user_password.txt"
 else
-	rmdir $SECRETS $ENV
+	rmdir "$SECRETS" "$ENV"
 	echo "Error: unable to make .secrets"
 	exit 1
+fi
+
+VOLUME="$(grep VOLUME $ENV | cut -d= -f2)"
+if [ ! -d "$VOLUME" ]; then
+    mkdir -p "$VOLUME"
+    if [ $? != 0 ]; then
+      rm "$SECRETS" "$ENV"
+      echo "Error: uname to make $VOLUME directory."
+      exit 1
+    fi
 fi

@@ -5,23 +5,47 @@ services:
     build:
       context: ./requirements/nginx
       args:
-        OS_VERSION: ${OS_VERSION}
+        OS_VERSION:
+    container_name: nginx
+    networks:
+      - incepnet
+    depends_on:
+      - wordpress
   wordpress:
     build:
       context: ./requirements/wordpress
       args:
-        OS_VERSION: ${OS_VERSION}
+        OS_VERSION:
+    container_name: wp-fpm
+    environment:
+      LOGIN:
+      DOMAIN:
+      DB_NAME:
+      DB_USER:
+      WP_ADMIN:
+      WP_USER:
     secrets:
+      - db_password
       - admin_password
       - user_password
+    networks:
+      - incepnet
+    depends_on:
+      - mysql
   mysql:
     build:
       context: ./requirements/mariadb
       args:
-        OS_VERSION: ${OS_VERSION}
+        OS_VERSION:
+    container_name: mariadb
+    environment:
+      DB_NAME:
+      DB_USER:
     secrets:
       - db_root_password
       - db_password
+    networks:
+      - incepnet
 
 networks:
   incepnet:
