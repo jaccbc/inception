@@ -15,6 +15,10 @@ if [ -z "$LOGIN" ]; then
 	fi
 	LOGIN=$USER
 	echo "LOGIN set as $USER"
+  if ! grep -q "$LOGIN.42.fr" /etc/hosts; then
+    echo -n "Added to /etc/hosts: "
+    echo "127.0.0.42 $LOGIN.42.fr" | sudo tee -a /etc/hosts
+  fi
 fi
 ROOT_DIR=$(git rev-parse --show-toplevel)
 if [ ! -d "$ROOT_DIR" ]; then
@@ -31,6 +35,11 @@ echo "DB_USER=$(tr -dc 'a-z0-9' < /dev/urandom | head -c 7)" >> "$ENV"
 echo "DB_NAME=$(tr -dc 'a-z0-9' < /dev/urandom | head -c 7)" >> "$ENV"
 echo "WP_ADMIN=$(tr -dc 'a-z0-9' < /dev/urandom | head -c 7)" >> "$ENV"
 echo "WP_USER=$(tr -dc 'a-z0-9' < /dev/urandom | head -c 7)" >> "$ENV"
+MYSQL_UID=$(id mysql | grep -o 'uid=[0-9]\+')
+MYSQL_GID=$(id mysql | grep -o 'gid=[0-9]\+')
+echo "MYSQL_${MYSQL_UID^^}" >> "$ENV"
+echo "MYSQL_${MYSQL_GID^^}" >> "$ENV"
+
 
 SECRETS="$ROOT_DIR/.secrets"
 mkdir -p "$SECRETS"
@@ -39,6 +48,11 @@ if [ -d "$SECRETS" ]; then
 	openssl rand -base64 42 > "$SECRETS/db_password.txt"
 	openssl rand -base64 42 > "$SECRETS/admin_password.txt"
 	openssl rand -base64 42 > "$SECRETS/user_password.txt"
+  openssl req -x509 -nodes -days 42 -newkey rsa:4096 \
+    --keyout $SECRETS/self-signed.key \
+    --out $SECRETS/self-signed.crt \
+    -subj "/C=PT/ST=Lisbon/L=Lisbon/O=42Network/OU=42Lisboa/CN=$LOGIN.42.fr" \
+    > /dev/null 2>&1
 else
 	rmdir "$SECRETS" "$ENV"
 	echo "Error: unable to make .secrets"
@@ -47,10 +61,11 @@ fi
 
 VOLUME="$(grep VOLUME $ENV | cut -d= -f2)"
 if [ ! -d "$VOLUME" ]; then
-    mkdir -p "$VOLUME"
+    mkdir -p "$VOLUME/db" "$VOLUME/wp"
     if [ $? != 0 ]; then
       rm "$SECRETS" "$ENV"
-      echo "Error: uname to make $VOLUME directory."
+      echo "Error: unable to make $VOLUME data"
       exit 1
     fi
+    sudo chown -R mysql:mysql "$VOLUME/db"
 fi

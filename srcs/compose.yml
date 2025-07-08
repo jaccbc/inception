@@ -7,10 +7,20 @@ services:
       args:
         OS_VERSION:
     container_name: nginx
+    environment:
+      DOMAIN:
+    secrets:
+      - ssl_key
+      - ssl_cert
     networks:
       - incepnet
+    ports:
+      - 443:8443
+    volumes:
+      - ${VOLUME}/wp:/var/www/html
     depends_on:
       - wordpress
+    restart: always
   wordpress:
     build:
       context: ./requirements/wordpress
@@ -30,8 +40,11 @@ services:
       - user_password
     networks:
       - incepnet
+    volumes:
+      - ${VOLUME}/wp:/var/www/html
     depends_on:
       - mysql
+    restart: always
   mysql:
     build:
       context: ./requirements/mariadb
@@ -41,14 +54,22 @@ services:
     environment:
       DB_NAME:
       DB_USER:
+      MYSQL_UID:
+      MYSQL_GID:
     secrets:
       - db_root_password
       - db_password
     networks:
       - incepnet
+    volumes:
+      - ${VOLUME}/db:/var/lib/mysql
+    restart: always
 
 networks:
   incepnet:
+
+volumes:
+  wp-data:
 
 secrets:
   db_root_password:
@@ -59,3 +80,7 @@ secrets:
     file: ../.secrets/admin_password.txt
   user_password:
     file: ../.secrets/user_password.txt
+  ssl_key:
+    file: ../.secrets/self-signed.key
+  ssl_cert:
+    file: ../.secrets/self-signed.crt

@@ -6,7 +6,7 @@
 #    By: joandre- <joandre-@student.42lisboa.com>   +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/02 02:45:08 by joandre-          #+#    #+#              #
-#    Updated: 2025/07/05 20:26:27 by joandre-         ###   ########.fr        #
+#    Updated: 2025/07/08 06:51:50 by joandre-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,9 +19,6 @@ all: $(NAME)
 $(NAME):
 	ENV=$(NAME) ./srcs/requirements/tools/setup.sh
 	docker compose -f $(SRC) up -d --build
-
-up: 
-	docker compose -f $(SRC) up $(DOCK) -d
 
 down:
 	docker compose -f $(SRC) down

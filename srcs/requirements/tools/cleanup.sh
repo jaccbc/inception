@@ -13,7 +13,12 @@ fi
 
 VOLUME="$(grep VOLUME $ENV | cut -d= -f2)"
 if [ -d "$VOLUME" ]; then
-   rm -rf "$VOLUME"
+   sudo rm -rf "$VOLUME"
+fi
+
+DOMAIN="$(grep DOMAIN $ENV | cut -d= -f2)"
+if grep "127.0.0.42 $DOMAIN" /etc/hosts; then
+   sudo sed -i "/127.0.0.42 $DOMAIN/d" /etc/hosts
 fi
 
 if [ -f "$ENV" ]; then
