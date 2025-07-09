@@ -6,7 +6,7 @@
 #    By: joandre- <joandre-@student.42lisboa.com>   +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/02 02:45:08 by joandre-          #+#    #+#              #
-#    Updated: 2025/07/09 06:11:43 by joandre-         ###   ########.fr        #
+#    Updated: 2025/07/09 06:57:48 by joandre-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,7 +25,7 @@ build:
 stop:
 	docker compose -f $(SRC) stop
 
-up:
+up: $(NAME)
 	docker compose -f $(SRC) up -d
 
 down:
@@ -47,4 +47,10 @@ fclean: stop clean
 	docker system prune -af
 	ENV=$(NAME) ./srcs/requirements/tools/cleanup.sh
 
+run: all 
+	until nc -z $(shell docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' wp-fpm) 9000; do sleep 1; done
+	firefox https://$(shell grep DOMAIN $(NAME) | cut -d= -f2) > /dev/null 2>&1 &
+
 re: fclean all
+
+rerun: re run
