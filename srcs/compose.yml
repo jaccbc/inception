@@ -6,6 +6,7 @@ services:
       context: ./requirements/nginx
       args:
         OS_VERSION:
+    image: nginx
     container_name: nginx
     environment:
       DOMAIN:
@@ -13,11 +14,11 @@ services:
       - ssl_key
       - ssl_cert
     networks:
-      - incepnet
+      - inception
     ports:
       - 443:8443
     volumes:
-      - ${VOLUME}/wp:/var/www/html
+      - wp-data:/var/www/html
     depends_on:
       - wordpress
     restart: always
@@ -26,6 +27,7 @@ services:
       context: ./requirements/wordpress
       args:
         OS_VERSION:
+    image: wordpress
     container_name: wp-fpm
     environment:
       LOGIN:
@@ -39,9 +41,9 @@ services:
       - admin_password
       - user_password
     networks:
-      - incepnet
+      - inception
     volumes:
-      - ${VOLUME}/wp:/var/www/html
+      - wp-data:/var/www/html
     depends_on:
       - mysql
     restart: always
@@ -50,6 +52,7 @@ services:
       context: ./requirements/mariadb
       args:
         OS_VERSION:
+    image: mysql
     container_name: mariadb
     environment:
       DB_NAME:
@@ -60,16 +63,28 @@ services:
       - db_root_password
       - db_password
     networks:
-      - incepnet
+      - inception
     volumes:
-      - ${VOLUME}/db:/var/lib/mysql
+      - db-data:/var/lib/mysql
     restart: always
 
 networks:
-  incepnet:
+  inception:
+    name: incepnet
 
 volumes:
+  db-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${VOLUME}/db
+      o: bind
   wp-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${VOLUME}/wp
+      o: bind
 
 secrets:
   db_root_password:

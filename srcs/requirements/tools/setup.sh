@@ -16,7 +16,6 @@ if [ -z "$LOGIN" ]; then
 	LOGIN=$USER
 	echo "LOGIN set as $USER"
   if ! grep -q "$LOGIN.42.fr" /etc/hosts; then
-    echo -n "Added to /etc/hosts: "
     echo "127.0.0.42 $LOGIN.42.fr" | sudo tee -a /etc/hosts
   fi
 fi
@@ -30,9 +29,9 @@ echo "ROOT_DIR=$ROOT_DIR" > "$ENV"
 echo "LOGIN=$LOGIN" >> "$ENV"
 echo "DOMAIN=$LOGIN.42.fr" >> "$ENV"
 echo "VOLUME=/home/$LOGIN/data" >> "$ENV"
-echo "OS_VERSION=$(curl -s https://dl-cdn.alpinelinux.org/alpine/ | grep -o 'v[0-9]\+\.[0-9]\+' | sort -u | sort -n | tail -n2 | head -n1 | cut -dv -f2)" >> "$ENV"
+echo "OS_VERSION=$(curl -s https://dl-cdn.alpinelinux.org/alpine/ | grep -o 'v[0-9]\+\.[0-9]\+' | sort -t. -k2,2n -u | tail -n2 | head -n1 | cut -dv -f2)" >> "$ENV"
+echo "DB_NAME=inception" >> "$ENV"
 echo "DB_USER=$(tr -dc 'a-z0-9' < /dev/urandom | head -c 7)" >> "$ENV"
-echo "DB_NAME=$(tr -dc 'a-z0-9' < /dev/urandom | head -c 7)" >> "$ENV"
 echo "WP_ADMIN=$(tr -dc 'a-z0-9' < /dev/urandom | head -c 7)" >> "$ENV"
 echo "WP_USER=$(tr -dc 'a-z0-9' < /dev/urandom | head -c 7)" >> "$ENV"
 MYSQL_UID=$(id mysql | grep -o 'uid=[0-9]\+')

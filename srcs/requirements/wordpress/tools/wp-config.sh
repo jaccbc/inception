@@ -2,16 +2,16 @@
 
 set -eu
 
-until nc -z mysql 3306; do
-  sleep 3
-done
-
 if [ ! -f "/var/www/html/wp-config.php" ]; then
   DB_PASS=$(cat /run/secrets/db_password)
   ADMIN_PASS=$(cat /run/secrets/admin_password)
   USER_PASS=$(cat /run/secrets/user_password)
 
   wp-cli core download --allow-root
+
+  until nc -z mysql 3306; do
+    sleep 2
+  done
 
   wp-cli config create --dbname=$DB_NAME --dbuser=$DB_USER \
     --dbpass=$DB_PASS --dbhost=mysql \
@@ -26,5 +26,9 @@ if [ ! -f "/var/www/html/wp-config.php" ]; then
     --user_pass=$USER_PASS --role=editor \
     --path=/var/www/html --allow-root
 fi
+
+until nc -z mysql 3306; do
+  sleep 2
+done
 
 exec /usr/sbin/php-fpm -F

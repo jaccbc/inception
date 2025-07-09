@@ -7,7 +7,7 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
   DB_PASS=$(cat /run/secrets/db_password)
   TMP=db-boot.sql
 
-  mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+  mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
   echo "USE mysql;" > ${TMP}
   echo "FLUSH PRIVILEGES;" >> ${TMP}
   echo "DELETE FROM mysql.user WHERE User='';" >> ${TMP}
@@ -26,4 +26,4 @@ fi
 usermod -u $MYSQL_UID mysql && groupmod -g $MYSQL_GID mysql
 mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld /var/lib/mysql
 
-exec /usr/bin/mysqld --user=mysql --console
+exec /usr/bin/mariadbd --user=mysql --console
