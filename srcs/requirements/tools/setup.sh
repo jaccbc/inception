@@ -15,10 +15,12 @@ if [ -z "$LOGIN" ]; then
 	fi
 	LOGIN=$USER
 	echo "LOGIN set as $USER"
-  if ! grep -q "$LOGIN.42.fr" /etc/hosts; then
-    echo "127.0.0.42 $LOGIN.42.fr" | sudo tee -a /etc/hosts > /dev/null
-  fi
 fi
+
+if ! grep -q "$LOGIN.42.fr" /etc/hosts; then
+  echo "127.0.0.42 $LOGIN.42.fr" | sudo tee -a /etc/hosts > /dev/null
+fi
+
 ROOT_DIR=$(git rev-parse --show-toplevel)
 if [ ! -d "$ROOT_DIR" ]; then
 	echo "Error: could not fetch project root directory"
