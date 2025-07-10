@@ -10,7 +10,7 @@ RUN apk add --no-cache wget php php-fpm \
   && chmod +x wp-cli.phar && mv wp-cli.phar /usr/bin/wp-cli
 
 WORKDIR /var/www/html
-RUN apk del wget && rm -rf /usr/share/doc /tmp/*
+RUN apk del wget
 COPY ./tools/wp-config.sh /usr/local/bin/wp-config.sh
 
 ENTRYPOINT [ "/usr/local/bin/wp-config.sh" ]

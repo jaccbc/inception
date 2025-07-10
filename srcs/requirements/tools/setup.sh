@@ -62,7 +62,7 @@ fi
 
 VOLUME="$(grep VOLUME $ENV | cut -d= -f2)"
 if [ ! -d "$VOLUME" ]; then
-    mkdir -p "$VOLUME/db" "$VOLUME/wp"
+    sudo mkdir -p "$VOLUME/db" "$VOLUME/wp"
     if [ $? != 0 ]; then
       rm "$SECRETS" "$ENV"
       echo "Error: unable to make $VOLUME data"
