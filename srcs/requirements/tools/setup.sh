@@ -2,6 +2,20 @@
 
 set -e
 
+if ! which sudo > /dev/null 2>&1; then
+	echo "Error: sudo not found"
+	exit 1
+elif ! sudo -l > /dev/null 2>&1; then
+	echo "Error: you need sudo permissions to run the script"
+	exit 1
+elif [ $(id -un) == 'root' ]; then
+	echo "Error: do not run the script with sudo/root"
+	exit 1
+elif ! id $(id -un) | grep -q docker; then
+	echo "Error: you need to be in the docker group"
+	exit 1
+fi
+
 if [ -z $ENV ]; then
 	echo "Error: empty environment variable"
 	exit 1
@@ -9,12 +23,8 @@ fi
 
 read -p "Enter your intra login: " LOGIN
 if [ -z "$LOGIN" ]; then
-	if [ -z "$USER" ]; then
-		echo "Error: no login"
-		exit 1
-	fi
-	LOGIN=$USER
-	echo "LOGIN set as $USER"
+	LOGIN=$(id -un)
+	echo "LOGIN set as $(id -un)"
 fi
 
 if ! grep -q "$LOGIN.42.fr" /etc/hosts; then
@@ -36,11 +46,6 @@ echo "DB_NAME=inception" >> "$ENV"
 echo "DB_USER=$(tr -dc 'a-z0-9' < /dev/urandom | head -c 7)" >> "$ENV"
 echo "WP_ADMIN=$(tr -dc 'a-z0-9' < /dev/urandom | head -c 7)" >> "$ENV"
 echo "WP_USER=$(tr -dc 'a-z0-9' < /dev/urandom | head -c 7)" >> "$ENV"
-MYSQL_UID=$(id mysql | grep -o 'uid=[0-9]\+')
-MYSQL_GID=$(id mysql | grep -o 'gid=[0-9]\+')
-echo "MYSQL_${MYSQL_UID^^}" >> "$ENV"
-echo "MYSQL_${MYSQL_GID^^}" >> "$ENV"
-
 
 SECRETS="$ROOT_DIR/.secrets"
 mkdir -p "$SECRETS"
@@ -62,11 +67,9 @@ fi
 
 VOLUME="$(grep VOLUME $ENV | cut -d= -f2)"
 if [ ! -d "$VOLUME" ]; then
-    sudo mkdir -p "$VOLUME/db" "$VOLUME/wp"
-    if [ $? != 0 ]; then
+    if ! sudo mkdir -p "$VOLUME/db" "$VOLUME/wp"; then
       rm "$SECRETS" "$ENV"
       echo "Error: unable to make $VOLUME data"
       exit 1
     fi
-    sudo chown -R mysql:mysql "$VOLUME/db"
 fi

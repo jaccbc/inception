@@ -2,7 +2,18 @@
 
 set -eu
 
-if [ ! -f $ENV ]; then
+if ! which sudo > /dev/null 2>&1; then
+  echo "Error: sudo not found"
+  exit 1
+elif ! sudo -l > /dev/null 2>&1; then
+  echo "Error: you need sudo permissions to run the script"
+  exit 1
+elif ! id $(id -un) | grep -q docker; then
+	echo "Error: you need to be in the docker group"
+	exit 1
+fi
+
+if [ ! -f "$ENV" ]; then
 	exit 0
 fi
 
