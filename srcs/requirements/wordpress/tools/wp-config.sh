@@ -14,7 +14,7 @@ if [ ! -f "/var/www/html/wp-config.php" ]; then
   done
 
   wp-cli config create --dbname=$DB_NAME --dbuser=$DB_USER \
-    --dbpass=$DB_PASS --dbhost=mysql \
+    --dbpass=$DB_PASS --dbhost=mariadb \
     --path=/var/www/html --allow-root
 
   wp-cli core install --url=$DOMAIN --title=Inception \
