@@ -9,7 +9,7 @@ if [ ! -f "/var/www/html/wp-config.php" ]; then
 
   wp-cli core download --allow-root
 
-  until nc -z mysql 3306; do
+  until nc -z mariadb 3306; do
     sleep 2
   done
 
@@ -27,7 +27,7 @@ if [ ! -f "/var/www/html/wp-config.php" ]; then
     --path=/var/www/html --allow-root
 fi
 
-until nc -z mysql 3306; do
+until nc -z mariadb 3306; do
   sleep 2
 done
 
