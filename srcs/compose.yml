@@ -49,18 +49,16 @@ services:
     depends_on:
       - mysql
     restart: always
-  mysql:
+  mariadb:
     build:
       context: ./requirements/mariadb
       args:
         OS_VERSION:
-    image: mysql
+    image: mariadb
     container_name: mariadb
     environment:
       DB_NAME:
       DB_USER:
-      MYSQL_UID:
-      MYSQL_GID:
     secrets:
       - db_root_password
       - db_password
