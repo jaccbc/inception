@@ -19,11 +19,10 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
   echo "CREATE USER '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASS}';" >> ${TMP}
   echo "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASS}';" >> ${TMP}
   echo "FLUSH PRIVILEGES;" >> ${TMP}
-  /usr/bin/mysqld --user=mysql --bootstrap < ${TMP}
+  /usr/bin/mariadbd --user=mysql --bootstrap < ${TMP}
   rm -f ${TMP}
 fi
 
-usermod -u $MYSQL_UID mysql && groupmod -g $MYSQL_GID mysql
-mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld /var/lib/mysql
+mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld
 
 exec /usr/bin/mariadbd --user=mysql --console
