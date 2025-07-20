@@ -47,7 +47,7 @@ services:
     volumes:
       - wp-data:/var/www/html
     depends_on:
-      - mysql
+      - mariadb
     restart: always
   mariadb:
     build:
