@@ -42,8 +42,6 @@ services:
       - user_password
     networks:
       - inception
-    dns:
-      - 1.1.1.1
     volumes:
       - wp-data:/var/www/html
     depends_on:
